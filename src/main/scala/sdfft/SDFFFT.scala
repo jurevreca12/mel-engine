@@ -217,7 +217,7 @@ class SDFFFT[T <: Data : Real : BinaryRepresentation](val params: FFTParams[T]) 
   }
 }
 
-object SDFFFTSimpleApp extends App
+/*object SDFFFTSimpleApp extends App
 {
   val buildDirName = "verilog"
   val wordSize = 12
@@ -264,4 +264,4 @@ object SDFFFTSimpleApp extends App
     //(new ChiselStage).execute(arguments, Seq(ChiselGeneratorAnnotation(() =>new SDFFFT(params) with FlattenInstance)))
     (new ChiselStage).execute(arguments, Seq(ChiselGeneratorAnnotation(() =>new SDFFFT(params))))
   }
-}
+}*/
