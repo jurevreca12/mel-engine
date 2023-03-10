@@ -1,13 +1,30 @@
 """ Generates hex file with librosa filters. """
+import argparse
+import pathlib
 import librosa
 from fixedpoint import FixedPoint
 import numpy as np
 
+if __name__ != '__main__':
+    raise RuntimeError("This script should only be run directly.")
+
+
+parser = argparse.ArgumentParser(description="Generates the hex file used by "
+                                             "the MelEngine to compute the "
+                                             "mel coefficients.")
+parser.add_argument('--hex_file',
+                    required=True,
+                    type=pathlib.Path,
+                    help="Generated hex file path.")
+parser.add_argument('--index_file',
+                    type=pathlib.Path,
+                    help="Generated index file path.")
+
+args = parser.parse_args()
 
 N_FFT = 512
 SR = 16000
 N_MELS = 20
-
 
 filter_banks = librosa.filters.mel(n_fft=N_FFT,
                                    sr=SR,
@@ -21,11 +38,13 @@ np.savetxt('mel_filters.csv', filter_banks, delimiter=',', fmt='%.4f')
 val0 = True
 hex_vals0 = []
 hex_vals1 = []
-for fbank in filter_banks:
+stops = [0] * 20
+for fb_ind, fbank in enumerate(filter_banks):
     pre_zeros_done = False
     for ind, val in enumerate(fbank): 
         if val > 0.0001:
             pre_zeros_done = True
+            stops[fb_ind] = ind
             if val0:
                 hex_vals0.append(FixedPoint(val, signed=False, m=0, n=16))
             else:
@@ -47,4 +66,12 @@ for i in range(0, len(filter_banks[0])):
     hv1 = hex_vals1[i]
     hexstr += f"{str(hv1)} {str(hv0)} // {float(hv1):.4f}, {float(hv0):.4f}\n"
 
-print(hexstr[:-1])  # we use slicing to remove the last \n
+with open(args.hex_file, "w", encoding='ascii') as f:
+    f.write(hexstr[:-1])
+
+if args.index_file is not None:
+    stops_str = ""
+    for stop in stops:
+        stops_str += f"{stop}\n"
+    with open(args.index_file, "w", encoding='ascii') as f:
+        f.write(stops_str)
