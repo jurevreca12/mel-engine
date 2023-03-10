@@ -29,16 +29,16 @@ class MelEngine [T <: Data : Ring](fftParams: FFTParams[T], outParamSize: Int) e
   }
 
   val nstate = WireInit(melState.sWAIT)
-  val state = RegInit(melState.SWAIT)
+  val state  = RegInit(melState.SWAIT)
 
 
   ////////////////////////////
   ///  Vector Index Logic  ///
   ////////////////////////////
   when (state == melState.sWAIT) {
-    vecInd = 0.U
+    vecInd := 0.U
   }.elsewhen(state == melState.sCOMP && !nextMelValReady){
-    f
+    vecInd := vecInd + 1.U
   }
 
 }
@@ -58,6 +58,7 @@ class dspMultiplier(inp0Width: Int, inp1Width: Int, shift: int = 0) extends Modu
     val inp1 = Input(UInt(inp1Width.W)),
     val out = Output(UInt((outWidth).W))
   })
+
   val mul = Wire(Uint())
   mul := io.inp0 * io.inp1
   if (shift == 0) {
