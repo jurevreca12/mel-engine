@@ -1,9 +1,11 @@
 """ Generates hex file with librosa filters. """
 import argparse
 import pathlib
+import io
 import librosa
 from fixedpoint import FixedPoint
 import numpy as np
+
 
 if __name__ != '__main__':
     raise RuntimeError("This script should only be run directly.")
@@ -60,18 +62,18 @@ fp_zero = FixedPoint(0.0, signed=False, m=0, n=16)
 hex_vals0 = (hex_vals0 + ([fp_zero]*(257-len(hex_vals0)))) if len(hex_vals0) < 257 else hex_vals0
 hex_vals1 = (hex_vals1 + ([fp_zero]*(257-len(hex_vals1)))) if len(hex_vals1) < 257 else hex_vals1
 
-hexstr = ""
+hexstr = io.StringIO()
 for i in range(0, len(filter_banks[0])):
     hv0 = hex_vals0[i]
     hv1 = hex_vals1[i]
-    hexstr += f"{str(hv1)} {str(hv0)} // {float(hv1):.4f}, {float(hv0):.4f}\n"
+    hexstr.write(f"{str(hv1)} {str(hv0)} // {float(hv1):.4f}, {float(hv0):.4f}\n")
 
 with open(args.hex_file, "w", encoding='ascii') as f:
-    f.write(hexstr[:-1])
+    f.write(hexstr.getvalue()[:-1])
 
 if args.index_file is not None:
-    stops_str = ""
+    stops_str = io.StringIO()
     for stop in stops:
-        stops_str += f"{stop}\n"
+        stops_str.write(f"{stop}\n")
     with open(args.index_file, "w", encoding='ascii') as f:
-        f.write(stops_str)
+        f.write(stops_str.getvalue())

@@ -3,7 +3,7 @@
 package spi2axis
 
 import chisel3._
-
+import chisel3.util.Decoupled
 
 class SPIBundle extends Bundle {
   val CS    = Output(Bool())
@@ -15,7 +15,7 @@ class SPIBundle extends Bundle {
 class SPItoAXIStreamMaster extends Module {
   val io = IO(new Bundle {
     val spi  = new SPIBundle
-    val axis = new Irrevocable(Output(UInt(32.W)))
+    //val axis = new Decoupled(UInt(32.W))
   })
 
   val clockCnt    = RegInit(0.U(8.W))
