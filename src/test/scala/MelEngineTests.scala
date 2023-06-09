@@ -62,28 +62,30 @@ class MelEngineTests extends AnyFlatSpec with ChiselScalatestTester {
 
   behavior.of("MelEngine module together with SDFFT module")
   it should "simulate MelEngine and SDFFT together" in {
-    test(new MelEngineTestBed(params, 8)) { dut =>
-      dut.clock.setTimeout(1500)
+    test(new MelEngineTestBed(params, 8)).withAnnotations(Seq(VerilatorBackendAnnotation, WriteFstAnnotation)) { dut =>
+      dut.clock.setTimeout(25000)
       val length_sec = 1
       val fs = 16000.0
       val tone_freq = 200.0
-      val tone = (0 until 512).map(i => Complex((math.sin(2.0 * math.Pi * tone_freq * (i/fs)) + 1.0)*2047.0*0.8, 0.0))
+      val tone = (0 until 512*11).map(i => Complex((math.sin(2.0 * math.Pi * tone_freq * (i/fs)) + 1.0)*2047.0*0.8, 0.0))
       //val tone = Array(0, 1, 2, 3, 2, 1, 0, 1).map(i => Complex(i, 0.0))
       dut.clock.step(10)
+      dut.io.outStream.data.ready.poke(true.B)
       for (t <- 0 until tone.length) {
         dut.io.in.valid.poke(true.B)
         while (!dut.io.in.ready.peek().litToBoolean) { dut.clock.step() } // wait for ready
         dut.io.in.bits.poke(DspComplex.protoWithFixedWidth[FixedPoint](tone(t), FixedPoint(13.W, 0.BP)))
-        if (t == tone.length-1) {
+        if ((t+1) % fftSize == 0) {
           dut.io.lastIn.poke(true.B)
         }
         dut.clock.step()
+        dut.io.lastIn.poke(false.B)
       }
       dut.io.in.valid.poke(false.B)
       dut.io.lastIn.poke(false.B)
       println("overflow = " + dut.io.overflow.peek().litValue)
-      dut.io.outStream.data.ready.poke(true.B)
-      dut.clock.step(1200)
+
+      dut.clock.step(25000)
     }
   }
 }

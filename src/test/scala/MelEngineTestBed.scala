@@ -15,18 +15,18 @@ extends Module {
     // FFTIO
     val in = Flipped(Decoupled(fftParams.protoIQ))
     val lastIn = Input(Bool())
-    val overflow = Output(Vec(log2Up(fftParams.numPoints), Bool()))
+    val overflow = Output(Bool())
 
     // MelEngine out
     val outStream = new AXIStream(32)
 })
 
   val sdfft = Module(new SDFFFT(fftParams))
-  val melEngine = Module(new MelEngine(fftParams, outParamSize))
+  val melEngine = Module(new MelEngine(fftParams, 20, 32, outParamSize))
 
   sdfft.io.in <> io.in
   sdfft.io.lastIn := io.lastIn
-  io.overflow := sdfft.io.overflow.getOrElse(VecInit(false.B))
+  io.overflow := sdfft.io.overflow.getOrElse(VecInit(false.B)).reduceTree(_ || _)
 
   melEngine.io.fftIn <> sdfft.io.out
   melEngine.io.lastFft := sdfft.io.lastOut

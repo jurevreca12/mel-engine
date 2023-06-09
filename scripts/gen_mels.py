@@ -66,7 +66,7 @@ hexstr = io.StringIO()
 for i in range(0, len(filter_banks[0])):
     hv0 = hex_vals0[i]
     hv1 = hex_vals1[i]
-    hexstr.write(f"{str(hv1)} {str(hv0)} // {float(hv1):.4f}, {float(hv0):.4f}\n")
+    hexstr.write(f"{str(hv1)}{str(hv0)} //{float(hv1):.4f},{float(hv0):.4f}\n")
 
 with open(args.hex_file, "w", encoding='ascii') as f:
     f.write(hexstr.getvalue()[:-1])

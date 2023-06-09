@@ -1,7 +1,12 @@
 ### Project Specific stuff
 test_run_dir/*
 venv/
-mel_index.txt
+melIndex.txt
+melFilters.hex
+mel_filters.csv
+
+.mypy_cache/
+__pycache__/
 
 ### XilinxISE template
 # intermediate build files

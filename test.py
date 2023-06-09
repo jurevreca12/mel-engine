@@ -9,12 +9,6 @@ num_frames = 32
 act_len = num_frames * frame_length # 16384
 
 
-def to_12_bit_unsigned(signal):
-    signal = (signal.astype(np.float32)*(2**16)) + 2**15
-    signal = signal / 2**4
-    signal = np.clip(signal, 0, 4095)
-    return signal
-
 def frame_signal(signal):
     signal = np.pad(signal, (0, act_len-len(signal))) # pad after
     
@@ -26,21 +20,19 @@ def frame_signal(signal):
     return frames
 
 
-def preprocess_frames(frames, n_mels=20):
-    fft_res = np.fft.rfft(frames)
-    mag_frames = (fft_res.real / 2**9)**2  # No imaginary component!
-    filter_banks = librosa.filters.mel(n_fft=frame_length, sr=sr, n_mels=n_mels, fmin=0, fmax=((sr/2)+1), norm=None)
-    if n_mels > 0:
-        mels = np.dot(filter_banks, mag_frames.T)
-        mels = np.where(mels == 0, np.finfo(float).eps, mels)  # Numerical Stability
-    else:
-        mels = mag_frames
-    log_mels = np.log2(mels, dtype=np.float32) * 8
-    return np.floor(log_mels)
+filter_banks = librosa.filters.mel(n_fft=frame_length, sr=sr, n_mels=20, fmin=0, fmax=((sr/2)+1), norm=None)
+def preprocess_frames(frames):
+    global filter_banks
+    fft_res = np.fft.rfft(frames, norm='forward')
+    mag_frames = fft_res.real**2  # No imaginary component!
+    mels = np.dot(filter_banks, mag_frames.T)
+    mels = np.where(mels == 0, np.finfo(float).eps, mels)  # Numerical Stabiity
+    log_mels = np.log2(mels, dtype=np.float32) * 8 # Multiply by 8 (shift by 3) to get a reasonably sized output  approx (0-160)
+    return np.floor(log_mels) # get "integers"
 
 
 def preprocess(signal, n_mels=20):
-    frames = frame_signal(to_12_bit_unsigned(signal))
+    frames = frame_signal(signal)
     return preprocess_frames(frames, n_mels=n_mels)
 
 
@@ -49,7 +41,6 @@ fs = 16000
 tone_freq = 200
 time_axis = np.linspace(0, length_sec, length_sec * fs)
 sine_wave = np.sin(2*np.pi*tone_freq*time_axis)
-stft = preprocess_frames(sine_wave, n_mels=0)
 tone = (sine_wave[0:512] + 1) * 2047 * 0.8
 win_tone = tone * np.hamming(512)
 fft_res = np.fft.rfft(win_tone, norm='forward')
