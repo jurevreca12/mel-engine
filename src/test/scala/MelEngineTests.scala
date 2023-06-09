@@ -63,11 +63,11 @@ class MelEngineTests extends AnyFlatSpec with ChiselScalatestTester {
   behavior.of("MelEngine module together with SDFFT module")
   it should "simulate MelEngine and SDFFT together" in {
     test(new MelEngineTestBed(params, 8)).withAnnotations(Seq(VerilatorBackendAnnotation, WriteFstAnnotation)) { dut =>
-      dut.clock.setTimeout(25000)
+      dut.clock.setTimeout(32000)
       val length_sec = 1
       val fs = 16000.0
       val tone_freq = 200.0
-      val tone = (0 until 512*11).map(i => Complex((math.sin(2.0 * math.Pi * tone_freq * (i/fs)) + 1.0)*2047.0*0.8, 0.0))
+      val tone = (0 until 512*32).map(i => Complex((math.sin(2.0 * math.Pi * tone_freq * (i/fs)) + 1.0)*2047.0*0.8, 0.0))
       //val tone = Array(0, 1, 2, 3, 2, 1, 0, 1).map(i => Complex(i, 0.0))
       dut.clock.step(10)
       dut.io.outStream.data.ready.poke(true.B)
@@ -85,7 +85,7 @@ class MelEngineTests extends AnyFlatSpec with ChiselScalatestTester {
       dut.io.lastIn.poke(false.B)
       println("overflow = " + dut.io.overflow.peek().litValue)
 
-      dut.clock.step(25000)
+      dut.clock.step(32000)
     }
   }
 }
