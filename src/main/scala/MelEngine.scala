@@ -47,7 +47,7 @@ extends Module {
     val fftIn = Flipped(Decoupled(fftParams.protoIQstages(log2Up(fftParams.numPoints) -1)))
     val lastFft = Input(Bool())
 
-    val outStream = new AXIStreamIO(UInt(8.W))
+    val outStream = new AXIStreamIO(SInt(6.W))
   })
 	val numElements = fftParams.numPoints
 	val numRealElements = (fftParams.numPoints / 2) + 1
@@ -84,8 +84,9 @@ extends Module {
   melMul1.io.inp1.valid := squareMul.io.out.valid
   acc0.io.in <> melMul0.io.out
 	acc1.io.in <> melMul1.io.out
-  val actResWholePart = Mux(melCntValue(0), acc1.io.out, acc0.io.out)(47,16)
-  val logRes = Log2(actResWholePart) 
+  val actRes = Mux(melCntValue(0), acc1.io.out, acc0.io.out) // log(xy)=log(x)+log(y)
+  val logRes = Log2(actRes) 
+  val res = logRes.asSInt - 16.S // the 16-bits from the decimal point come back here
   
 	/////////////////////////////
   /// CONTROL CIRCUITS      ///
@@ -103,8 +104,8 @@ extends Module {
   rom.io.wrEna  := false.B
 
   io.outStream.valid := elemCntValue === nextEnding
-  io.outStream.bits := logRes
-  io.outStream.last := frameCntWrap && elemCntValue === numRealElements.U
+  io.outStream.bits := res
+  io.outStream.last := frameCntWrap && elemCntValue === (numRealElements - 1).U
   io.fftIn.ready := true.B
 }
 

@@ -13,8 +13,9 @@ class MelEngineTestBed[T <: Data : Real : Ring : BinaryRepresentation](fftParams
 extends Module {
   val io = IO(new Bundle {
     val inStream = Flipped(AXIStream(fftParams.protoIQ))
-    val outStream = AXIStream(UInt(32.W))
+    val outStream = AXIStream(SInt(6.W))
     val overflow = Output(Bool())
+    val busy = Output(Bool())
 })
 
   val sdfft = Module(new SDFFFT(fftParams))
@@ -25,6 +26,7 @@ extends Module {
   sdfft.io.in.bits  := io.inStream.bits
   sdfft.io.lastIn   := io.inStream.last
   io.overflow := sdfft.io.overflow.getOrElse(VecInit(false.B)).reduceTree(_ || _)
+  io.busy := sdfft.io.busy
 
   melEngine.io.fftIn <> sdfft.io.out
   melEngine.io.lastFft := sdfft.io.lastOut

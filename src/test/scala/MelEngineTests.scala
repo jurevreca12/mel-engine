@@ -76,22 +76,25 @@ class MelEngineTests extends AnyFlatSpec with ChiselScalatestTester {
       val frames = toneFp.sliding(512, 512).toSeq
       var result: Seq[BigInt] = Seq()
 
-
-			dut.clock.setTimeout(32000)
+			dut.clock.setTimeout(25000)
 			dut.io.inStream.initSource()
     	dut.io.outStream.initSink()
 
       fork {
 			  for (frame <- frames) {
         	dut.io.inStream.enqueuePacket(frame, dut.clock)
+          while (dut.io.busy.peek().litToBoolean) {
+            dut.clock.step()
+          }
 			  }
       }.fork {
-        for (frame <- frames) {
-          result = result ++ dut.io.outStream.dequeuePacket(dut.clock)
-        }
+        result = dut.io.outStream.dequeuePacket(dut.clock)
       }.join()
-      print(result)
       dut.clock.step(10)
+      
+      for (seq <- result.sliding(20,20)) {
+        println(seq)
+      }
     }
   }
 }

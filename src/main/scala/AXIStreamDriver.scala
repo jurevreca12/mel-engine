@@ -44,23 +44,19 @@ class AXIStreamDriver[T <: Data](x: AXIStreamIO[T]) {
       enqueue(elt, elt == data.last, clock)
     }
   }
-
-  def dequeue(clock: Clock): BigInt = {
-    var result: BigInt = 0
-    x.ready.poke(true.B)
-    fork
-      .withRegion(Monitor) {
-        waitForValid(clock)
-        x.valid.expect(true.B)
-        result = x.bits.peek().litValue
-      }.joinAndStep(clock)
-    result
-  }
-
+  
   def dequeuePacket(clock: Clock): Seq[BigInt] = {
     var result: Seq[BigInt] = Seq()
-    while (x.last.peek().litToBoolean == false) {
-      result = result :+ dequeue(clock)
+    var value: BigInt = 0
+    var last: Boolean = false
+    x.ready.poke(true.B)
+    while (!last) {
+      fork.withRegion(Monitor) {
+        waitForValid(clock)
+        x.valid.expect(true.B)
+        result = result :+ x.bits.peek().litValue
+        last = x.last.peek().litToBoolean
+      }.joinAndStep(clock)
     }
     result
   }
