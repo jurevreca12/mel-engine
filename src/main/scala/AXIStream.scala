@@ -17,8 +17,21 @@ package afe.bus
 
 import chisel3._
 import chisel3.util._
+import chiseltest._
 
-class AXIStream(val dataWidth: Int) extends Bundle {
-  val data = Irrevocable(Output(UInt(dataWidth.W)))
-  val last = Output(Bool())
+class AXIStreamIO[+T <: Data](gen: T) extends ReadyValidIO[T](gen) {
+	// We extend the ready-valid interface with the last signal
+	val last = Output(Bool())
 }
+
+/** This factory adds a decoupled handshaking protocol to a data bundle. */
+object AXIStream {
+  def apply[T <: Data](gen: T): AXIStreamIO[T] = new AXIStreamIO(gen)
+
+  private final class EmptyBundle extends Bundle
+
+  def apply(): AXIStreamIO[Data] = apply(new EmptyBundle)
+
+  def empty: AXIStreamIO[Data] = AXIStream()
+}
+

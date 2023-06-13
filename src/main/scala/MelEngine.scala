@@ -5,7 +5,7 @@ import chisel3.util._
 import dsptools._
 import dsptools.numbers._
 import afe.memory.SRAMInit
-import afe.bus.AXIStream
+import afe.bus.AXIStreamIO
 import chisel3.util.log2Up
 import fft.FFTParams
 import scala.io.Source
@@ -47,7 +47,7 @@ extends Module {
     val fftIn = Flipped(Decoupled(fftParams.protoIQstages(log2Up(fftParams.numPoints) -1)))
     val lastFft = Input(Bool())
 
-    val outStream = new AXIStream(8)
+    val outStream = new AXIStreamIO(UInt(8.W))
   })
 	val numElements = fftParams.numPoints
 	val numRealElements = (fftParams.numPoints / 2) + 1
@@ -102,8 +102,8 @@ extends Module {
   rom.io.rdEna  := true.B
   rom.io.wrEna  := false.B
 
-  io.outStream.data.valid := elemCntValue === nextEnding
-  io.outStream.data.bits := logRes
+  io.outStream.valid := elemCntValue === nextEnding
+  io.outStream.bits := logRes
   io.outStream.last := frameCntWrap && elemCntValue === numRealElements.U
   io.fftIn.ready := true.B
 }

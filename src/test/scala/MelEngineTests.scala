@@ -28,6 +28,10 @@ import dsptools.numbers._
 import chisel3.experimental._
 import fft._
 
+import chisel3.stage.PrintFullStackTraceAnnotation
+
+import afe._
+
 class MelEngineTests extends AnyFlatSpec with ChiselScalatestTester {
   val logger = LoggerFactory.getLogger(classOf[MelEngineTests])
 
@@ -62,29 +66,26 @@ class MelEngineTests extends AnyFlatSpec with ChiselScalatestTester {
 
   behavior.of("MelEngine module together with SDFFT module")
   it should "simulate MelEngine and SDFFT together" in {
-    test(new MelEngineTestBed(params, 8)).withAnnotations(Seq(VerilatorBackendAnnotation, WriteFstAnnotation)) { dut =>
-      dut.clock.setTimeout(32000)
+    test(new MelEngineTestBed(params, 8)).withAnnotations(Seq(VerilatorBackendAnnotation, 
+                                                              WriteFstAnnotation)) { dut =>
       val length_sec = 1
       val fs = 16000.0
       val tone_freq = 200.0
       val tone = (0 until 512*32).map(i => Complex((math.sin(2.0 * math.Pi * tone_freq * (i/fs)) + 1.0)*2047.0*0.8, 0.0))
-      //val tone = Array(0, 1, 2, 3, 2, 1, 0, 1).map(i => Complex(i, 0.0))
-      dut.clock.step(10)
-      dut.io.outStream.data.ready.poke(true.B)
-      for (t <- 0 until tone.length) {
-        dut.io.in.valid.poke(true.B)
-        while (!dut.io.in.ready.peek().litToBoolean) { dut.clock.step() } // wait for ready
-        dut.io.in.bits.poke(DspComplex.protoWithFixedWidth[FixedPoint](tone(t), FixedPoint(13.W, 0.BP)))
-        if ((t+1) % fftSize == 0) {
-          dut.io.lastIn.poke(true.B)
-        }
-        dut.clock.step()
-        dut.io.lastIn.poke(false.B)
-      }
-      dut.io.in.valid.poke(false.B)
-      dut.io.lastIn.poke(false.B)
-      println("overflow = " + dut.io.overflow.peek().litValue)
+      val toneFp = tone.map(x => DspComplex.protoWithFixedWidth[FixedPoint](x, FixedPoint(13.W, 0.BP)))
+      val frames = toneFp.sliding(512, 512).toSeq
 
+
+			dut.clock.setTimeout(32000)
+			dut.io.inStream.initSource()
+    	dut.io.outStream.initSink()
+
+      dut.io.outStream.ready.poke(true.B)
+      fork {
+			  for (frame <- frames) {
+        	dut.io.inStream.enqueuePacket(frame, dut.clock)
+			  }
+      }.join()
       dut.clock.step(32000)
     }
   }

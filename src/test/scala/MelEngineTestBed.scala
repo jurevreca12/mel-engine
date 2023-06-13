@@ -6,26 +6,24 @@ import fft._
 import dsptools._
 import dsptools.numbers._
 import dsptools.numbers.implicits._
-import afe.bus.AXIStream
+import afe.bus._
 import afe._
 
 class MelEngineTestBed[T <: Data : Real : Ring : BinaryRepresentation](fftParams: FFTParams[T], outParamSize: Int) 
 extends Module {
   val io = IO(new Bundle {
-    // FFTIO
-    val in = Flipped(Decoupled(fftParams.protoIQ))
-    val lastIn = Input(Bool())
+    val inStream = Flipped(AXIStream(fftParams.protoIQ))
+    val outStream = AXIStream(UInt(32.W))
     val overflow = Output(Bool())
-
-    // MelEngine out
-    val outStream = new AXIStream(32)
 })
 
   val sdfft = Module(new SDFFFT(fftParams))
   val melEngine = Module(new MelEngine(fftParams, 20, 32, outParamSize))
 
-  sdfft.io.in <> io.in
-  sdfft.io.lastIn := io.lastIn
+  io.inStream.ready := sdfft.io.in.ready 
+  sdfft.io.in.valid := io.inStream.valid
+  sdfft.io.in.bits  := io.inStream.bits
+  sdfft.io.lastIn   := io.inStream.last
   io.overflow := sdfft.io.overflow.getOrElse(VecInit(false.B)).reduceTree(_ || _)
 
   melEngine.io.fftIn <> sdfft.io.out

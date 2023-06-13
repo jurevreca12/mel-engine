@@ -11,9 +11,9 @@ lazy val root = (project in file("."))
     name := "audio_features_extract",
     libraryDependencies ++= Seq(
       "edu.berkeley.cs" %% "chisel3"    	 % chiselVersion,
-      "edu.berkeley.cs" %% "chiseltest" 	 % "0.5.4" % "test",
-	  "edu.berkeley.cs" %% "dsptools"   	 % "1.5.6",
-	  "org.scalanlp"    %% "breeze"			 % "1.0"
+      "edu.berkeley.cs" %% "chiseltest" 	 % "0.5.4", // % "test",
+	  	"edu.berkeley.cs" %% "dsptools"   	 % "1.5.6",
+	  	"org.scalanlp"    %% "breeze"			 	% "1.0"
     ),
     scalacOptions ++= Seq(
       "-language:reflectiveCalls",
