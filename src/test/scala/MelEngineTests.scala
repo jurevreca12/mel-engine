@@ -74,19 +74,24 @@ class MelEngineTests extends AnyFlatSpec with ChiselScalatestTester {
       val tone = (0 until 512*32).map(i => Complex((math.sin(2.0 * math.Pi * tone_freq * (i/fs)) + 1.0)*2047.0*0.8, 0.0))
       val toneFp = tone.map(x => DspComplex.protoWithFixedWidth[FixedPoint](x, FixedPoint(13.W, 0.BP)))
       val frames = toneFp.sliding(512, 512).toSeq
+      var result: Seq[BigInt] = Seq()
 
 
 			dut.clock.setTimeout(32000)
 			dut.io.inStream.initSource()
     	dut.io.outStream.initSink()
 
-      dut.io.outStream.ready.poke(true.B)
       fork {
 			  for (frame <- frames) {
         	dut.io.inStream.enqueuePacket(frame, dut.clock)
 			  }
+      }.fork {
+        for (frame <- frames) {
+          result = result ++ dut.io.outStream.dequeuePacket(dut.clock)
+        }
       }.join()
-      dut.clock.step(32000)
+      print(result)
+      dut.clock.step(10)
     }
   }
 }
