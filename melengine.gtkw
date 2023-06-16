@@ -1,0 +1,154 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Fri Jun  9 08:26:37 2023
+[*]
+[dumpfile] "/home/jure/Projekti/audio_features_extract/test_run_dir/MelEngine_module_together_with_SDFFT_module_should_simulate_MelEngine_and_SDFFT_together/MelEngineTestBed.fst"
+[dumpfile_mtime] "Fri Jun  9 07:52:30 2023"
+[dumpfile_size] 6584243
+[savefile] "/home/jure/Projekti/audio_features_extract/test_run_dir/MelEngine_module_together_with_SDFFT_module_should_simulate_MelEngine_and_SDFFT_together/melengine.gtkw"
+[timestart] 2142
+[size] 2560 1403
+[pos] -1 -1
+*-2.000000 2160 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.MelEngineTestBed.
+[treeopen] TOP.MelEngineTestBed.melEngine.
+[treeopen] TOP.MelEngineTestBed.sdfft.
+[sst_width] 312
+[signals_width] 357
+[sst_expanded] 1
+[sst_vpaned_height] 423
+@28
+TOP.clock
+TOP.reset
+@20000
+-
+@200
+-FFT
+@420
+TOP.MelEngineTestBed.sdfft.fft_io_in_bits_real[12:0]
+@8420
+TOP.io_in_bits_real[12:0]
+TOP.MelEngineTestBed.sdfft.fft_io_in_bits_real[12:0]
+@28
+TOP.MelEngineTestBed.sdfft.fft_io_in_ready
+TOP.MelEngineTestBed.sdfft.fft_io_in_valid
+TOP.MelEngineTestBed.sdfft.fft_io_lastIn
+@20000
+-
+@28
+TOP.MelEngineTestBed.io_overflow
+@20000
+-
+@420
+TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+@c08420
+TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+@28
+(0)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(1)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(2)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(3)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(4)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(5)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(6)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(7)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(8)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(9)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(10)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(11)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+(12)TOP.MelEngineTestBed.sdfft.fft_io_out_bits_real[12:0]
+@1401200
+-group_end
+@28
+>1
+TOP.MelEngineTestBed.sdfft.fft_io_out_valid
+>0
+TOP.MelEngineTestBed.sdfft.fft_io_out_ready
+TOP.MelEngineTestBed.sdfft.fft_io_lastOut
+@20000
+-
+@28
+TOP.MelEngineTestBed.sdfft.io_lastIn
+TOP.MelEngineTestBed.sdfft.io_lastOut
+@20000
+-
+@200
+-melEngine
+@c00420
+TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+@28
+(0)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(1)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(2)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(3)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(4)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(5)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(6)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(7)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(8)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(9)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(10)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(11)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+(12)TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+@1401200
+-group_end
+@8420
+TOP.MelEngineTestBed.melEngine.io_fftIn_bits_real[12:0]
+@28
+TOP.MelEngineTestBed.melEngine.io_fftIn_valid
+TOP.MelEngineTestBed.melEngine.io_fftIn_ready
+@20000
+-
+@420
+TOP.MelEngineTestBed.melEngine.io_outStream_data_bits[7:0]
+@28
+TOP.MelEngineTestBed.melEngine.io_outStream_data_valid
+TOP.io_outStream_data_ready
+TOP.MelEngineTestBed.melEngine.io_outStream_last
+@20000
+-
+@24
+TOP.MelEngineTestBed.melEngine.elemCntValue[8:0]
+TOP.MelEngineTestBed.melEngine.melCntValue[4:0]
+@28
+TOP.MelEngineTestBed.melEngine.melCntWrap
+@24
+TOP.MelEngineTestBed.melEngine.frameCntValue[4:0]
+@28
+TOP.MelEngineTestBed.melEngine.frameCntWrap
+@20000
+-
+@200
+-acc0
+@24
+TOP.MelEngineTestBed.melEngine.acc0.acc[47:0]
+@40000024
+[fpshift_count] 16
+TOP.MelEngineTestBed.melEngine.acc0.acc[47:0]
+@200
+-acc1
+@24
+TOP.MelEngineTestBed.melEngine.acc1.acc[47:0]
+@40000025
+[fpshift_count] 16
+TOP.MelEngineTestBed.melEngine.acc1.acc[47:0]
+@20000
+-
+@200
+-melMul0
+@24
+TOP.MelEngineTestBed.melEngine.melMul0.io_inp0_bits[25:0]
+TOP.MelEngineTestBed.melEngine.melMul0.io_inp1_bits[15:0]
+TOP.MelEngineTestBed.melEngine.melMul0.io_out_bits[41:0]
+@40000024
+[fpshift_count] 16
+TOP.MelEngineTestBed.melEngine.melMul0.io_out_bits[41:0]
+@200
+-melMul1
+@24
+TOP.MelEngineTestBed.melEngine.melMul1.io_inp0_bits[25:0]
+TOP.MelEngineTestBed.melEngine.melMul1.io_inp1_bits[15:0]
+TOP.MelEngineTestBed.melEngine.melMul1.io_out_bits[41:0]
+[pattern_trace] 1
+[pattern_trace] 0
