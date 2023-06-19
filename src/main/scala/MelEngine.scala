@@ -5,7 +5,7 @@ import chisel3.util._
 import dsptools._
 import dsptools.numbers._
 import afe.memory.SRAMInit
-import afe.bus.AXIStreamIO
+import interfaces.amba.axis.AXIStreamIO
 import chisel3.util.log2Up
 import fft.FFTParams
 import scala.io.Source

@@ -2,11 +2,11 @@ package afe
 
 import chisel3._
 import chisel3.util._
+import interfaces.amba.axis.AXIStream
 import fft._
 import dsptools._
 import dsptools.numbers._
 import dsptools.numbers.implicits._
-import afe.bus._
 import afe._
 
 class AudioFeaturesExtract[T <: Data : Real : Ring : BinaryRepresentation](fftParams: FFTParams[T], outParamSize: Int) 
