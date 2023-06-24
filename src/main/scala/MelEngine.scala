@@ -53,8 +53,10 @@ extends Module {
 	val numRealElements = (fftParams.numPoints / 2) + 1
 
   // filter values
-  val rom = Module(new SRAMInit(depth=(fftParams.numPoints / 2) + 1, width=32, memFile="melFilters.hex"))
-  val melFilterEndings = Source.fromFile("melIndex.txt").getLines().toList  // rom addresss where filters end
+  val melMemFile = "/home/jure/Projekti/chisel4ml/melFilters.hex" // TODO: Change this 
+  val melIndexFile = "/home/jure/Projekti/chisel4ml/melIndex.txt"
+  val rom = Module(new SRAMInit(depth=(fftParams.numPoints / 2) + 1, width=32, memFile=melMemFile))
+  val melFilterEndings = Source.fromFile(melIndexFile).getLines().toList  // rom addresss where filters end
   	
 	val nextMel = Wire(Bool())
 	val nextEnding = Wire(UInt())
@@ -105,7 +107,7 @@ extends Module {
 
   io.outStream.valid := elemCntValue === nextEnding
   io.outStream.bits := res
-  io.outStream.last := frameCntWrap && elemCntValue === (numRealElements - 1).U
+  io.outStream.last := elemCntValue === (numRealElements - 1).U
   io.fftIn.ready := true.B
 }
 
@@ -125,10 +127,9 @@ class accumulatorWithValid(width: Int, inWidth: Int) extends Module {
 	io.out := acc
 }
 
-class dspMul[I <: Bits with Num[I], 
-						 O <: Bits](genI0: I, 
-							    			genI1: I, 
-												genO: O) 
+class dspMul[I <: Bits with Num[I], O <: Bits](genI0: I, 
+							    	           genI1: I, 
+									           genO: O) 
 extends Module {
   val io = IO(new Bundle {
     val inp0 = Flipped(Valid(genI0))

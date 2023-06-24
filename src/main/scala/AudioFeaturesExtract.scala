@@ -25,7 +25,7 @@ extends Module {
   sdfft.io.in.valid := io.inStream.valid
   sdfft.io.in.bits  := io.inStream.bits
   sdfft.io.lastIn   := io.inStream.last
-  io.overflow := sdfft.io.overflow.getOrElse(VecInit(false.B)).reduceTree(_ || _)
+  io.overflow := sdfft.io.overflow.get.reduceTree(_ || _)
   io.busy := sdfft.io.busy
 
   melEngine.io.fftIn <> sdfft.io.out
