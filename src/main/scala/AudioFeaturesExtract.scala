@@ -26,6 +26,7 @@ extends Module {
   sdfft.io.in.bits  := io.inStream.bits
   sdfft.io.lastIn   := io.inStream.last
   io.overflow := sdfft.io.overflow.get.reduceTree(_ || _)
+  dontTouch(io.overflow)
   io.busy := sdfft.io.busy
 
   melEngine.io.fftIn <> sdfft.io.out
