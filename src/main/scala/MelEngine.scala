@@ -58,8 +58,8 @@ extends Module {
   val rom = Module(new SRAMInit(depth=(fftParams.numPoints / 2) + 1, width=32, memFile=melMemFile))
   val melFilterEndings = Source.fromFile(melIndexFile).getLines().toList  // rom addresss where filters end
   	
-	val nextMel = Wire(Bool())
-	val nextEnding = Wire(UInt())
+  val nextMel = Wire(Bool())
+  val nextEnding = Wire(UInt())
   
   val squareMul = Module(new dspMul[SInt, UInt](SInt(13.W), SInt(13.W), UInt(26.W)))
   // U(26,0) x U(0,16) = U(26,16) 
@@ -67,11 +67,11 @@ extends Module {
   val melMul1 = Module(new dspMul[UInt, UInt](UInt(26.W), UInt(16.W), UInt(42.W)))
   val acc0 = Module(new accumulatorWithValid(width=48, inWidth=42))
   val acc1 = Module(new accumulatorWithValid(width=48, inWidth=42))
-	val (elemCntValue, elemCntWrap) = Counter(io.fftIn.valid, numElements)
-	val (melCntValue, melCntWrap) = Counter(nextMel, numMels)
-	val (frameCntValue, frameCntWrap) = Counter(melCntWrap, numFrames)
+  val (elemCntValue, elemCntWrap) = Counter(io.fftIn.valid, numElements)
+  val (melCntValue, melCntWrap) = Counter(nextMel, numMels)
+  val (frameCntValue, frameCntWrap) = Counter(melCntWrap, numFrames)
   
-	/////////////////////////////
+  /////////////////////////////
   /// ARITHMETIC PIPELINE   ///
   /////////////////////////////
   squareMul.io.inp0.bits := io.fftIn.bits.real.asUInt.asSInt 
@@ -85,17 +85,17 @@ extends Module {
   melMul0.io.inp1.valid := squareMul.io.out.valid
   melMul1.io.inp1.valid := squareMul.io.out.valid
   acc0.io.in <> melMul0.io.out
-	acc1.io.in <> melMul1.io.out
+  acc1.io.in <> melMul1.io.out
   val actRes = Mux(melCntValue(0), acc1.io.out, acc0.io.out) // log(xy)=log(x)+log(y)
   val logRes = Log2(actRes) 
   val res = logRes.asSInt - 16.S // the 16-bits from the decimal point come back here
   
-	/////////////////////////////
+  /////////////////////////////
   /// CONTROL CIRCUITS      ///
   /////////////////////////////
-	nextMel := elemCntValue === nextEnding
-	acc0.io.reset := !melCntValue(0) && elemCntValue === nextEnding
-	acc1.io.reset := melCntValue(0) && elemCntValue === nextEnding
+  nextMel := elemCntValue === nextEnding
+  acc0.io.reset := !melCntValue(0) && elemCntValue === nextEnding
+  acc1.io.reset := melCntValue(0) && elemCntValue === nextEnding
 
   nextEnding := MuxLookup(melCntValue, 0.U, melFilterEndings.zipWithIndex.map(x => (x._2.U) -> (x._1.toInt.U)))
 
