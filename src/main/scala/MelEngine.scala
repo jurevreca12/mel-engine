@@ -78,24 +78,27 @@ extends Module {
   squareMul.io.inp1.bits := io.fftIn.bits.real.asUInt.asSInt 
   squareMul.io.inp0.valid := io.fftIn.valid && io.fftIn.ready // ready is always asserted
   squareMul.io.inp1.valid := io.fftIn.valid && io.fftIn.ready // ready is always asserted
+
   melMul0.io.inp0 <> RegNext(squareMul.io.out)
-  melMul1.io.inp0 <> RegNext(squareMul.io.out)
   melMul0.io.inp1.bits := rom.io.rdData(16,0).asUInt // mel coefficients are 16bit - 2 fit in a 32bit row of ROM
+  melMul0.io.inp1.valid := true.B
+  
+  melMul1.io.inp0 <> RegNext(squareMul.io.out)
   melMul1.io.inp1.bits := rom.io.rdData(31,16).asUInt
-  melMul0.io.inp1.valid := squareMul.io.out.valid
-  melMul1.io.inp1.valid := squareMul.io.out.valid
+  melMul1.io.inp1.valid := true.B
+  
   acc0.io.in <> melMul0.io.out
   acc1.io.in <> melMul1.io.out
-  val actRes = Mux(melCntValue(0), acc1.io.out, acc0.io.out) // log(xy)=log(x)+log(y)
+  val actRes = Mux(RegNext(RegNext(melCntValue(0))), acc1.io.out, acc0.io.out) // log(xy)=log(x)+log(y)
   val logRes = Log2(actRes) 
   val res = logRes.asSInt - 16.S // the 16-bits from the decimal point come back here
-  
+
   /////////////////////////////
   /// CONTROL CIRCUITS      ///
   /////////////////////////////
   nextMel := elemCntValue === nextEnding
-  acc0.io.reset := !melCntValue(0) && elemCntValue === nextEnding
-  acc1.io.reset := melCntValue(0) && elemCntValue === nextEnding
+  acc0.io.reset := RegNext(RegNext(!melCntValue(0) && elemCntValue === nextEnding))
+  acc1.io.reset := RegNext(RegNext(melCntValue(0) && elemCntValue === nextEnding))
 
   nextEnding := MuxLookup(melCntValue, 0.U, melFilterEndings.zipWithIndex.map(x => (x._2.U) -> (x._1.toInt.U)))
 
@@ -105,9 +108,9 @@ extends Module {
   rom.io.rdEna  := true.B
   rom.io.wrEna  := false.B
 
-  io.outStream.valid := elemCntValue === nextEnding
+  io.outStream.valid := RegNext(RegNext(elemCntValue === nextEnding))
   io.outStream.bits := res
-  io.outStream.last := elemCntValue === (numRealElements - 1).U
+  io.outStream.last := RegNext(RegNext(elemCntValue === (numRealElements - 1).U))
   io.fftIn.ready := true.B
 }
 
