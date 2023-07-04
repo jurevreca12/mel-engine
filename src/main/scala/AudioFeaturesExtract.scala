@@ -9,7 +9,7 @@ import dsptools.numbers._
 import dsptools.numbers.implicits._
 import afe._
 
-class AudioFeaturesExtract[T <: Data : Real : Ring : BinaryRepresentation](fftParams: FFTParams[T], outParamSize: Int) 
+class AudioFeaturesExtract[T <: Data : Real : Ring : BinaryRepresentation](fftParams: FFTParams[T]) 
 extends Module {
   val io = IO(new Bundle {
     val inStream = Flipped(AXIStream(fftParams.protoIQ))
@@ -19,7 +19,7 @@ extends Module {
 })
 
   val sdfft = Module(new SDFFFT(fftParams))
-  val melEngine = Module(new MelEngine(fftParams, 20, 32, outParamSize))
+  val melEngine = Module(new MelEngine(fftParams, 20, 32))
 
   io.inStream.ready := sdfft.io.in.ready 
   sdfft.io.in.valid := io.inStream.valid

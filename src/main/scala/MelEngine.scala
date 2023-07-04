@@ -41,7 +41,7 @@ import scala.io.Source
 	     +-----------------+
 	
 */
-class MelEngine [T <: Data : Ring](fftParams: FFTParams[T], numMels:Int, numFrames:Int, outParamSize: Int) 
+class MelEngine [T <: Data : Ring](fftParams: FFTParams[T], numMels:Int, numFrames:Int) 
 extends Module {
   val io = IO(new Bundle {
     val fftIn = Flipped(Decoupled(fftParams.protoIQstages(log2Up(fftParams.numPoints) -1)))
@@ -49,8 +49,8 @@ extends Module {
 
     val outStream = new AXIStreamIO(SInt(6.W))
   })
-	val numElements = fftParams.numPoints
-	val numRealElements = (fftParams.numPoints / 2) + 1
+  val numElements = fftParams.numPoints
+  val numRealElements = (fftParams.numPoints / 2) + 1
 
   // filter values
   val melMemFile = "/home/jure/Projekti/chisel4ml/melFilters.hex" // TODO: Change this 
@@ -61,12 +61,18 @@ extends Module {
   val nextMel = Wire(Bool())
   val nextEnding = Wire(UInt())
   
-  val squareMul = Module(new dspMul[SInt, UInt](SInt(13.W), SInt(13.W), UInt(26.W)))
+  val squareMul = Module(new dspMul[SInt, UInt](SInt(io.fftIn.bits.getWidth.W), 
+                                                SInt(io.fftIn.bits.getWidth.W), 
+                                                UInt((2 * io.fftIn.bits.getWidth).W)))
   // U(26,0) x U(0,16) = U(26,16) 
-  val melMul0 = Module(new dspMul[UInt, UInt](UInt(26.W), UInt(16.W), UInt(42.W)))
-  val melMul1 = Module(new dspMul[UInt, UInt](UInt(26.W), UInt(16.W), UInt(42.W)))
-  val acc0 = Module(new accumulatorWithValid(width=48, inWidth=42))
-  val acc1 = Module(new accumulatorWithValid(width=48, inWidth=42))
+  val melMul0 = Module(new dspMul[UInt, UInt](UInt((2 * io.fftIn.bits.getWidth).W), 
+                                              UInt(16.W), 
+                                              UInt((2 * io.fftIn.bits.getWidth + 16).W)))
+  val melMul1 = Module(new dspMul[UInt, UInt](UInt((2 * io.fftIn.bits.getWidth).W), 
+                                              UInt(16.W), 
+                                              UInt((2 * io.fftIn.bits.getWidth + 16).W)))
+  val acc0 = Module(new accumulatorWithValid(width=64, inWidth=(2 * io.fftIn.bits.getWidth + 16)))
+  val acc1 = Module(new accumulatorWithValid(width=64, inWidth=(2 * io.fftIn.bits.getWidth + 16)))
   val (elemCntValue, elemCntWrap) = Counter(io.fftIn.valid, numElements)
   val (melCntValue, melCntWrap) = Counter(nextMel, numMels)
   val (frameCntValue, frameCntWrap) = Counter(melCntWrap, numFrames)
@@ -91,7 +97,7 @@ extends Module {
   acc1.io.in <> melMul1.io.out
   val actRes = Mux(RegNext(RegNext(melCntValue(0))), acc1.io.out, acc0.io.out) // log(xy)=log(x)+log(y)
   val logRes = Log2(actRes) 
-  val res = logRes.asSInt - 16.S // the 16-bits from the decimal point come back here
+  val res = logRes.asSInt - (16 + 2*9).S // the 16-bits from the decimal point come back here
 
   /////////////////////////////
   /// CONTROL CIRCUITS      ///
