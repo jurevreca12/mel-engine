@@ -120,7 +120,7 @@ extends Module {
 
   io.outStream.valid := RegNext(RegNext(elemCntValue === nextEnding))
   io.outStream.bits := res
-  io.outStream.last := RegNext(RegNext(elemCntValue === (numRealElements - 1).U))
+  io.outStream.last := RegNext(RegNext(elemCntValue === (numRealElements - 1).U && frameCntValue === (numFrames - 1).U))
   io.fftIn.ready := true.B
 }
 
