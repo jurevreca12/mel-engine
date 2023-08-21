@@ -21,10 +21,26 @@ extends Module {
   val sdfft = Module(new SDFFFT(fftParams))
   val melEngine = Module(new MelEngine(fftParams, 20, 32))
 
-  io.inStream.ready := sdfft.io.in.ready 
+  // Fix discrepancy between last signal semantics of LBIRDriver and FFT.
+  // FFT has per frame last signals, LBIRDriver per tensor last signal.
+  val (_, fftCounterWrap) = Counter(io.inStream.fire, fftParams.numPoints)
+  
+  object afeState extends ChiselEnum {
+    val sWAIT  = Value(0.U)
+    val sREADY = Value(1.U)
+  }
+  val state = RegInit(afeState.sREADY)
+
+  when (state === afeState.sREADY && fftCounterWrap) {
+    state := afeState.sWAIT
+  }.elsewhen(state === afeState.sWAIT && sdfft.io.lastOut) {
+    state := afeState.sREADY
+  }
+
+  io.inStream.ready := state === afeState.sREADY 
   sdfft.io.in.valid := io.inStream.valid
   sdfft.io.in.bits  := io.inStream.bits
-  sdfft.io.lastIn   := io.inStream.last
+  sdfft.io.lastIn   := io.inStream.last || fftCounterWrap
   io.overflow := sdfft.io.overflow.get.reduceTree(_ || _)
   dontTouch(io.overflow)
   io.busy := sdfft.io.busy
