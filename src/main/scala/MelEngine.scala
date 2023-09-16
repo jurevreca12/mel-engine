@@ -48,7 +48,7 @@ extends Module {
     val fftIn = Flipped(Decoupled(fftParams.protoIQstages(log2Up(fftParams.numPoints) -1)))
     val lastFft = Input(Bool())
 
-    val outStream = new AXIStreamIO(SInt(6.W))
+    val outStream = new AXIStreamIO(SInt())
   })
 
   val numElements = fftParams.numPoints
@@ -61,18 +61,18 @@ extends Module {
   val nextMel = Wire(Bool())
   val nextEnding = Wire(UInt())
   
-  val squareMul = Module(new dspMul[SInt, UInt](SInt(io.fftIn.bits.getWidth.W), 
-                                                SInt(io.fftIn.bits.getWidth.W), 
-                                                UInt((2 * io.fftIn.bits.getWidth).W)))
-  // U(26,0) x U(0,16) = U(26,16) 
-  val melMul0 = Module(new dspMul[UInt, UInt](UInt((2 * io.fftIn.bits.getWidth).W), 
+  val squareMul = Module(new dspMul[SInt, UInt](SInt(io.fftIn.bits.real.getWidth.W), 
+                                                SInt(io.fftIn.bits.real.getWidth.W), 
+                                                UInt((2 * io.fftIn.bits.real.getWidth).W)))
+  // U(29,0) x U(0,16) = U(29,16) 
+  val melMul0 = Module(new dspMul[UInt, UInt](UInt((2 * io.fftIn.bits.real.getWidth).W), 
                                               UInt(16.W), 
-                                              UInt((2 * io.fftIn.bits.getWidth + 16).W)))
-  val melMul1 = Module(new dspMul[UInt, UInt](UInt((2 * io.fftIn.bits.getWidth).W), 
+                                              UInt((2 * io.fftIn.bits.real.getWidth + 16).W)))
+  val melMul1 = Module(new dspMul[UInt, UInt](UInt((2 * io.fftIn.bits.real.getWidth).W), 
                                               UInt(16.W), 
-                                              UInt((2 * io.fftIn.bits.getWidth + 16).W)))
-  val acc0 = Module(new accumulatorWithValid(width=56, inWidth=(2 * io.fftIn.bits.getWidth + 16)))
-  val acc1 = Module(new accumulatorWithValid(width=56, inWidth=(2 * io.fftIn.bits.getWidth + 16)))
+                                              UInt((2 * io.fftIn.bits.real.getWidth + 16).W)))
+  val acc0 = Module(new accumulatorWithValid(width=132, inWidth=(2 * io.fftIn.bits.real.getWidth + 16)))
+  val acc1 = Module(new accumulatorWithValid(width=132, inWidth=(2 * io.fftIn.bits.real.getWidth + 16)))
   val (elemCntValue, elemCntWrap) = Counter(io.fftIn.valid, numElements)
   val (melCntValue, melCntWrap) = Counter(nextMel, numMels)
   val (frameCntValue, frameCntWrap) = Counter(melCntWrap, numFrames)
@@ -100,9 +100,10 @@ extends Module {
 
   // TODO: Does this hold for when fftParams.keepMSBorLSB not all true?
   require(fftParams.keepMSBorLSB.reduce(_ && _))
-  val shiftFromInputs = 2 * fftParams.expandLogic.reduce(_ + _) // The 2 * comes from the squareMul
-  val res = logRes.asSInt - (16 + shiftFromInputs).S // TODO: Make this automatic by using fixed-point
-
+  //val shiftFromInputs = 2 * fftParams.expandLogic.reduce(_ + _) // The 2 * comes from the squareMul
+  val res = logRes.asSInt - (16+24).S // TODO: Make this automatic by using fixed-point
+  dontTouch(res)
+  dontTouch(logRes)
   /////////////////////////////
   /// CONTROL CIRCUITS      ///
   /////////////////////////////
@@ -141,8 +142,8 @@ class accumulatorWithValid(width: Int, inWidth: Int) extends Module {
 }
 
 class dspMul[I <: Bits with Num[I], O <: Bits](genI0: I, 
-							    	           genI1: I, 
-									           genO: O) 
+                                               genI1: I, 
+									                             genO: O) 
 extends Module {
   val io = IO(new Bundle {
     val inp0 = Flipped(Valid(genI0))
