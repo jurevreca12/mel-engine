@@ -22,7 +22,6 @@ import chiseltest._
 import org.scalatest.flatspec.AnyFlatSpec
 import dsptools.numbers.DspComplex
 import breeze.math.Complex
-import dsptools._
 import dsptools.numbers._
 import chisel3.experimental._
 

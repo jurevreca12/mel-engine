@@ -24,11 +24,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import dsptools.numbers.DspComplex
 import breeze.math.Complex
 import dsptools._
-import dsptools.numbers._
 import chisel3.experimental._
 import fft._
-
-import chisel3.stage.PrintFullStackTraceAnnotation
 
 import afe._
 

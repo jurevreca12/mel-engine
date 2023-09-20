@@ -4,12 +4,11 @@ import chisel3._
 import chisel3.util._
 import interfaces.amba.axis.AXIStream
 import fft._
-import dsptools._
 import dsptools.numbers._
 import dsptools.numbers.implicits._
 import afe._
 
-class AudioFeaturesExtract[T <: Data : Real : Ring : BinaryRepresentation](fftParams: FFTParams[T]) 
+class AudioFeaturesExtract[T <: Data : Real : BinaryRepresentation](fftParams: FFTParams[T]) 
 extends Module {
   val io = IO(new Bundle {
     val inStream = Flipped(AXIStream(fftParams.protoIQ))
