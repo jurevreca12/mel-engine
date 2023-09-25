@@ -2,7 +2,6 @@ package afe
 
 import chisel3._
 import chisel3.util._
-import dsptools.numbers._
 import memories.MemoryGenerator
 import interfaces.amba.axis.AXIStreamIO
 import chisel3.util.log2Up
