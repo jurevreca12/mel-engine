@@ -63,7 +63,7 @@ class MelEngineTests extends AnyFlatSpec with ChiselScalatestTester {
 
   behavior.of("MelEngine module together with SDFFT module")
   it should "simulate MelEngine and SDFFT together" in {
-    test(new AudioFeaturesExtract(params, 8)).withAnnotations(Seq(VerilatorBackendAnnotation, 
+    test(new AudioFeaturesExtract(params)).withAnnotations(Seq(VerilatorBackendAnnotation, 
                                                               WriteFstAnnotation)) { dut =>
       val length_sec = 1
       val fs = 16000.0

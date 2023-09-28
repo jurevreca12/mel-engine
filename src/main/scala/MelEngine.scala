@@ -83,11 +83,11 @@ extends Module {
   squareMul.io.inp1.valid := io.fftIn.valid && io.fftIn.ready // ready is always asserted
 
   melMul0.io.inp0 <> RegNext(squareMul.io.out)
-  melMul0.io.inp1.bits := melFiltersROM.io.rdData(16,0).asUInt // mel coefficients are 16bit - 2 fit in a 32bit row of ROM
+  melMul0.io.inp1.bits := melFiltersROM.io.read.data(16,0).asUInt // mel coefficients are 16bit - 2 fit in a 32bit row of ROM
   melMul0.io.inp1.valid := true.B
   
   melMul1.io.inp0 <> RegNext(squareMul.io.out)
-  melMul1.io.inp1.bits := melFiltersROM.io.rdData(31,16).asUInt
+  melMul1.io.inp1.bits := melFiltersROM.io.read.data(31,16).asUInt
   melMul1.io.inp1.valid := true.B
   
   acc0.io.in <> melMul0.io.out
@@ -110,11 +110,11 @@ extends Module {
 
   nextEnding := MuxLookup(melCntValue, 0.U, melFiltersEndings.zipWithIndex.map(x => (x._2.U) -> (x._1.toInt.U)))
 
-  melFiltersROM.io.rdAddr := elemCntValue
-  melFiltersROM.io.wrAddr := 0.U
-  melFiltersROM.io.wrData := 0.U
-  melFiltersROM.io.rdEna  := true.B
-  melFiltersROM.io.wrEna  := false.B
+  melFiltersROM.io.read.address := elemCntValue
+  melFiltersROM.io.write.address := 0.U
+  melFiltersROM.io.write.data := 0.U
+  melFiltersROM.io.read.enable  := true.B
+  melFiltersROM.io.write.enable  := false.B
 
   io.outStream.valid := RegNext(RegNext(elemCntValue === nextEnding))
   io.outStream.bits := res
