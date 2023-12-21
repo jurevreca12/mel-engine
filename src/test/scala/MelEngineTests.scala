@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package afe.tests
+package melengine.tests
 
 import _root_.org.slf4j.LoggerFactory
 import chisel3._
@@ -63,7 +63,7 @@ class MelEngineTests extends AnyFlatSpec with ChiselScalatestTester {
 
   behavior.of("MelEngine module together with SDFFT module")
   it should "simulate MelEngine and SDFFT together" in {
-    test(new AudioFeaturesExtract(params)).withAnnotations(Seq(VerilatorBackendAnnotation, 
+    test(new MelEngineTestBed(params)).withAnnotations(Seq(VerilatorBackendAnnotation, 
                                                               WriteFstAnnotation)) { dut =>
       val length_sec = 1
       val fs = 16000.0

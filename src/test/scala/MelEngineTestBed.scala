@@ -1,4 +1,4 @@
-package afe
+package melengine
 
 import chisel3._
 import chisel3.util._
@@ -8,7 +8,7 @@ import dsptools.numbers._
 import dsptools.numbers.implicits._
 import afe._
 
-class AudioFeaturesExtract[T <: Data : Real : BinaryRepresentation](fftParams: FFTParams[T]) 
+class MelEngineTestBed[T <: Data : Real : BinaryRepresentation](fftParams: FFTParams[T]) 
 extends Module {
   val io = IO(new Bundle {
     val inStream = Flipped(AXIStream(fftParams.protoIQ))
