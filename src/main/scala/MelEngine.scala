@@ -5,6 +5,7 @@ import chisel3.util._
 import memories.MemoryGenerator
 import interfaces.amba.axis.AXIStreamIO
 import chisel3.util.log2Up
+import chisel3.experimental.FixedPoint
 import fft.FFTParams
 import scala.io.Source
 
@@ -39,7 +40,7 @@ import scala.io.Source
 	     +-----------------+
 	
 */
-class MelEngine[T <: Data](fftParams: FFTParams[T], numMels:Int, numFrames:Int) 
+class MelEngine(fftParams: FFTParams[FixedPoint], numMels:Int, numFrames:Int) 
 extends Module {
   val io = IO(new Bundle {
     val fftIn = Flipped(Decoupled(fftParams.protoIQstages(log2Up(fftParams.numPoints) -1)))
