@@ -5,6 +5,8 @@ import chisel3.util._
 import memories.MemoryGenerator
 import interfaces.amba.axis.AXIStreamIO
 import fft.FFTParams
+import fft._
+import dsptools._
 import scala.io.Source
 import chisel3.experimental.FixedPoint
 
@@ -40,16 +42,32 @@ import chisel3.experimental.FixedPoint
 	
 */
 
-class MelEngine(fftParams: FFTParams[FixedPoint], numMels:Int, numFrames:Int) 
-extends Module {
+class MelEngine(fftSize: Int, numMels: Int, numFrames: Int) extends Module {
+  val fftParams = FFTParams.fixed(
+    dataWidth = 24,
+    binPoint = 12,
+    trimEnable = false,
+    numPoints = fftSize,
+    decimType = DITDecimType,
+    trimType = RoundHalfToEven,
+    twiddleWidth = 16,
+    useBitReverse = true,
+    windowFunc = WindowFunctionTypes.None(), // We do windowing in this module, because of issues with this
+    overflowReg = true,
+    numAddPipes = 1,
+    numMulPipes = 1,
+    sdfRadix = "2",
+    runTime = false,
+    expandLogic = Array.fill(log2Up(fftSize))(1),
+    keepMSBorLSB = Array.fill(log2Up(fftSize))(true)
+  )
+
   val io = IO(new Bundle {
     val fftIn = Flipped(Decoupled(fftParams.protoIQstages(log2Up(fftParams.numPoints) -1)))
     val lastFft = Input(Bool())
 
     val outStream = new AXIStreamIO(UInt())
   })
-  val numElements = fftParams.numPoints
-  val numRealElements = (fftParams.numPoints / 2) + 1
   val accumulatorWidth = 128
   val melFiltersHex = Source.fromResource("melFilters.hex").getLines().mkString("\n")
   val melFiltersEndings = Source.fromResource("melIndex.txt").getLines().toList // rom addresss where filters end
@@ -57,7 +75,7 @@ extends Module {
   
   val nextMel = Wire(Bool())
   val nextEnding = Wire(UInt()) 
-  val (elemCntValue, elemCntWrap) = Counter(io.fftIn.valid, numElements)
+  val (elemCntValue, elemCntWrap) = Counter(io.fftIn.valid, fftParams.numPoints)
   val (melCntValue, melCntWrap) = Counter(nextMel, numMels)
   val (frameCntValue, frameCntWrap) = Counter(melCntWrap, numFrames)
 
@@ -98,7 +116,7 @@ extends Module {
 
   io.outStream.valid := RegNext(RegNext(elemCntValue === nextEnding))
   io.outStream.bits := logOfAccumulator
-  io.outStream.last := RegNext(RegNext(elemCntValue === (numRealElements - 1).U && frameCntValue === (numFrames - 1).U))
+  io.outStream.last := RegNext(RegNext(elemCntValue === (fftParams.numPoints / 2).U && frameCntValue === (numFrames - 1).U))
   io.fftIn.ready := true.B
 }
 
