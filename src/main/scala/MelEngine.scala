@@ -80,7 +80,7 @@ class MelEngine(fftSize: Int, numMels: Int, numFrames: Int, melFilters: Seq[Floa
   })
   val accumulatorWidth = 128
   val (filtersHex, filterEnds) = convertMelsToHex(fftSize, numMels, melFilters)
-  val melFiltersROM = Module(MemoryGenerator.SRAMInitFromString(hexStr=filtersHex, isBinary = true))
+  val melFiltersROM = Module(MemoryGenerator.SRAMInitFromString(hexStr=filtersHex, isBinary = true, noWritePort = true))
   
   val nextMel = Wire(Bool())
   val nextEnding = Wire(UInt()) 
@@ -116,10 +116,7 @@ class MelEngine(fftSize: Int, numMels: Int, numFrames: Int, melFilters: Seq[Floa
   nextEnding := MuxLookup(melCounter, 0.U, filterEnds.zipWithIndex.map(x => (x._2.U) -> (x._1.toInt.U)))
 
   melFiltersROM.io.read.address := elementCounter
-  melFiltersROM.io.write.address := 0.U
-  melFiltersROM.io.write.data := 0.U
   melFiltersROM.io.read.enable  := true.B
-  melFiltersROM.io.write.enable  := false.B
 
   require(logOfAccumulator.getWidth <= 8, s"Output port set to 8-bits.")
   io.outStream.valid := RegNext(RegNext(elementCounter === nextEnding))
