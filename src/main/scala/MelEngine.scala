@@ -4,10 +4,10 @@ import chisel3._
 import chisel3.util._
 import melengine.utils.toBinaryB
 import memories.MemoryGenerator
-import chisel3.experimental.FixedPoint
 import org.slf4j.LoggerFactory
 import scala.collection.mutable.ArrayBuffer
 import interfaces.amba.axis.AXIStream
+import fixedpoint._
 
 /*
  The input is a set of 32 frames 512 in length. At 16kHz sampling rate 32 frames equal roughly a second.
