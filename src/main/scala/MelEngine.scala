@@ -75,8 +75,8 @@ class MelEngine(fftSize: Int, numMels: Int, numFrames: Int, melFilters: Seq[Floa
   val logger = LoggerFactory.getLogger("MelEngine")
 
   val io = IO(new Bundle {
-    val inStream = Flipped(AXIStream(genIn))
-    val outStream = AXIStream(UInt(8.W))
+    val inStream = Flipped(AXIStream(genIn, 1))
+    val outStream = AXIStream(UInt(8.W), 1)
   })
   val accumulatorWidth = 128
   val (filtersHex, filterEnds) = convertMelsToHex(fftSize, numMels, melFilters)
@@ -88,7 +88,7 @@ class MelEngine(fftSize: Int, numMels: Int, numFrames: Int, melFilters: Seq[Floa
   val (melCounter, melCounterWrap) = Counter(0 until numMels, nextMel)
   val (frameCounter, frameCounterWrap) = Counter(0 until numFrames, melCounterWrap)
 
-  val fftPlusOne = io.inStream.bits + 1.0.F(io.inStream.bits.binaryPoint)
+  val fftPlusOne = io.inStream.bits.head + 1.0.F(io.inStream.bits.head.binaryPoint)
   val squared = RegNext(fftPlusOne * fftPlusOne)
   dontTouch(squared)
 
@@ -120,7 +120,7 @@ class MelEngine(fftSize: Int, numMels: Int, numFrames: Int, melFilters: Seq[Floa
 
   require(logOfAccumulator.getWidth <= 8, s"Output port set to 8-bits.")
   io.outStream.valid := RegNext(RegNext(elementCounter === nextEnding))
-  io.outStream.bits := logOfAccumulator
+  io.outStream.bits.head := logOfAccumulator
   io.outStream.last := RegNext(RegNext(elementCounter === (fftSize / 2).U && frameCounter === (numFrames - 1).U))
   io.inStream.ready := true.B
 }
